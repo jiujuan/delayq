@@ -1,6 +1,13 @@
 ## delayq
 一个练手项目：延迟队列，基于redis的zset，list数据结构开发的。
 
+## 使用技术
+- Redis KV数据库
+- redis的go库 - github.com/gomodule/redigo
+- web框架Gin - github.com/gin-gonic/gin
+- log - go.uber.org/zap
+- config - github.com/spf13/viper
+
 ## 参考
 https://tech.youzan.com/queuing_delay/  有赞的延迟队列
 
