@@ -1,0 +1,28 @@
+[redis]
+ip = "192.168.1.109"
+port = 6379
+db = 0
+password = ""
+MaxIdle = 4            # redis连接池中最大的空闲链接为4
+MaxActive = 20
+IdleTimeout = 200      # 空闲连接超时时间
+MaxConnLifetime = 360
+ReadTimeout = 2
+WriteTimeout = 1
+KeepAlive = 1
+ConnTimeout = 5      # 连接超时瑟吉欧看
+
+[log]
+ErrorLog = "./data/error.log"
+AccessLog = "./data/access.log"
+LogLevel = "debug"               #debug, info, warn, error, panic, fatal
+LogEncode = "json"
+
+[delayq]
+JobPool = "jobqueue:"
+ReadyQueue = "readyqueue"
+DelayQueue = "delayqueue"
+
+[app]
+port = 8080
+ip = ""
