@@ -29,7 +29,7 @@ func run(t time.Time) {
 		for _, jobid := range jobs {
 			// 获取job的原始信息，如果不能存在就删掉 DelayQueue 中的信息
 			jobJson, err := job.GetJob(jobid)
-			if err != nil {
+			if err != nil && jobJson == "" {
 				err := bucketItem.DelDelayQueue(jobid)
 				if err != nil {
 					return

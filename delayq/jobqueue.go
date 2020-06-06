@@ -3,6 +3,7 @@ package delayq
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"time"
 
@@ -87,16 +88,58 @@ func AddJob(ctx *gin.Context) {
 
 // PopJob 从Redis中的List获取job
 func PopJob(ctx *gin.Context) {
-
+	readyJobId, err := GetReadyQueue()
+	if err != nil {
+		ctx.JSON(200, gin.H{
+			"msg":    "no job",
+			"status": 602,
+		})
+		return
+	}
+	var job = Job{}
+	re, err := job.GetJob(readyJobId)
+	if err != nil {
+		ctx.JSON(200, gin.H{
+			"msg":    "get job error",
+			"status": 603,
+		})
+		return
+	}
+	ctx.JSON(200, gin.H{
+		"msg":    "success",
+		"status": 200,
+		"data":   re,
+	})
 }
 
 //DeleteJob 删除一个job
 func DeleteJob(ctx *gin.Context) {
+	id := strings.TrimSpace(ctx.Param("id"))
+	if id == "" {
+		ctx.JSON(200, gin.H{
+			"msg":    "param error",
+			"status": 604,
+		})
+		return
+	}
 
-}
+	var bucketItem = BucketItem{}
+	bucketItem.DelDelayQueue(id)
 
-func FinishJob(ctx *gin.Context) {
+	var job = Job{}
+	err := job.DelJob(id)
+	if err != nil {
+		ctx.JSON(200, gin.H{
+			"msg":    "del job error",
+			"status": 605,
+		})
+		return
+	}
 
+	ctx.JSON(200, gin.H{
+		"msg":    "del job sucess",
+		"status": 200,
+	})
 }
 
 // AddJob 增加到job pool里(K/V)
@@ -112,8 +155,8 @@ func (job Job) GetJob(jobId string) (string, error) {
 }
 
 // DelJob 删除job
-func (job Job) DelJob() error {
-	err := redis.DEL(job.ID)
+func (job Job) DelJob(jobId string) error {
+	err := redis.DEL(jobId)
 	return err
 }
 
