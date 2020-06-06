@@ -1,7 +1,7 @@
 ## delayq
 延迟队列，基于redis的zset，list数据结构开发的。
 
-## 使用技术
+## 项目依赖库
 - Redis
 - redis的go库 - github.com/gomodule/redigo
 - web框架Gin - github.com/gin-gonic/gin
