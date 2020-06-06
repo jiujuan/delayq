@@ -1,6 +1,7 @@
 package delayq
 
 import (
+	"errors"
 	"fmt"
 
 	"time"
@@ -13,6 +14,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// Job job的元信息
 type Job struct {
 	Topic string `json:"topic"` //Job类型。可以理解成具体的业务名称
 	ID    string `json:"id"`    //Job的唯一标识。用来检索和删除指定的Job信息。
@@ -21,15 +23,18 @@ type Job struct {
 	Body  string `json:"body"` //Job的内容，供消费者做具体的业务处理，以json格式存储
 }
 
+// BucketItem 存放于zset中，以时间为单位的有序队列
 type BucketItem struct {
 	jobID     string `json:"jobid"` // job ID
-	timestamp int64
+	timestamp int64  //时间单位
 }
 
+// ReadyQueueItem 存放Ready 状态的job
 type ReadyQueueItem struct {
 	jobID string `json:"jobid"` // job ID
 }
 
+// AddJob 增加job到Redis中
 func AddJob(ctx *gin.Context) {
 	buf := make([]byte, 1024)
 	n, _ := ctx.Request.Body.Read(buf) // 获取body的内容
@@ -80,10 +85,12 @@ func AddJob(ctx *gin.Context) {
 	})
 }
 
+// PopJob 从Redis中的List获取job
 func PopJob(ctx *gin.Context) {
 
 }
 
+//DeleteJob 删除一个job
 func DeleteJob(ctx *gin.Context) {
 
 }
@@ -92,66 +99,76 @@ func FinishJob(ctx *gin.Context) {
 
 }
 
-// func GetExpireJob() ([]string, error) {
-
-// }
-
-// 增加到job pool里(K/V)
+// AddJob 增加到job pool里(K/V)
 func (job Job) AddJob(jobjson string) error {
 	_, err := redis.SET(GetJobPoolKey(job.ID), jobjson)
 	return err
 }
 
-// 获取job
-func (job Job) GetJob(jobid string) (string, error) {
-	val, err := redis.GET(GetJobPoolKey(job.ID))
+// GetJob 获取job
+func (job Job) GetJob(jobId string) (string, error) {
+	val, err := redis.GET(GetJobPoolKey(jobId))
 	return val, err
 }
 
-// 删除job
+// DelJob 删除job
 func (job Job) DelJob() error {
 	err := redis.DEL(job.ID)
 	return err
 }
 
-// 增加到延迟队列Delay Queue中 (zset)
+// AddDelayQueue 增加到延迟队列Delay Queue中 (zset)
 func (item BucketItem) AddDelayQueue() error {
 	_, err := redis.ZADD(GetDelayQueueKey(), item.timestamp, item.jobID)
 	return err
 }
 
-// 获取延迟队列中到期的job任务
-func GetExpireJob() ([]string, error) {
-	return redis.ZRANGEBYSCORE(GetDelayQueueKey(), "0", time.Now().Unix())
+// GetExpireJob 获取延迟队列中到期的job任务，实际获取的是job任务的ID
+func GetExpireJob(t time.Time) ([]string, error) {
+	res, err := redis.ZRANGEBYSCORE(GetDelayQueueKey(), "0", t.Unix())
+	if err != nil {
+		return nil, err
+	}
+
+	var jobIds []string
+	if len(res) > 0 {
+		for _, jobId := range res {
+			jobIds = append(jobIds, jobId)
+		}
+		return jobIds, nil
+	}
+	return jobIds, errors.New("job id empty")
 }
 
-// 删除延迟队列中的任务
-func (item BucketItem) DelDelayQueue() error {
-	err := redis.ZREM(GetDelayQueueKey(), item.jobID)
+// DelDelayQueue 删除延迟队列中的任务
+func (item BucketItem) DelDelayQueue(jobId string) error {
+	err := redis.ZREM(GetDelayQueueKey(), jobId)
 	return err
 }
 
-// 增加到Ready Queue里
-func (item ReadyQueueItem) AddReadyQueue() error {
-	err := redis.LPUSH(GetReadyQueueKey(), item.jobID)
+// AddReadyQueue 增加到Ready Queue里
+func (item ReadyQueueItem) AddReadyQueue(jobId string) error {
+	err := redis.LPUSH(GetReadyQueueKey(), jobId)
 	return err
 }
 
-// 从Ready Queue里取出数据
+// GetReadyQueue 从Ready Queue里取出数据
 func GetReadyQueue() (string, error) {
 	val, err := redis.BRPOP(GetReadyQueueKey())
 	return val, err
 }
 
-// ID -> jobid
+// GetJobPoolKey ID -> jobid
 func GetJobPoolKey(ID string) string {
 	return config.QConfig.DelayQ.JobPoll + ID
 }
 
+// GetReadyQueueKey 获取 ReadyQueue 的key
 func GetReadyQueueKey() string {
 	return config.QConfig.DelayQ.ReadyQueue
 }
 
+// GetDelayQueueKey 获取延迟队列的 key
 func GetDelayQueueKey() string {
 	return config.QConfig.DelayQ.DelayQueue
 }
