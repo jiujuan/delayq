@@ -2,7 +2,7 @@
 延迟队列，基于redis的zset，list数据结构开发的。
 
 ## 项目依赖库
-- Redis
+- Redis内存数据库 - [github.com/redis/redis](https://github.com/redis/redis)
 - redis的go库 - [github.com/gomodule/redigo](https://github.com/gomodule/redigo)
 - web框架Gin - [github.com/gin-gonic/gin](https://github.com/gin-gonic/gin)
 - 日志zap - [go.uber.org/zap](https://github.com/uber-go/zap)
