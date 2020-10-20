@@ -7,6 +7,7 @@
 - web框架Gin - [github.com/gin-gonic/gin](https://github.com/gin-gonic/gin)
 - 日志zap - [go.uber.org/zap](https://github.com/uber-go/zap)
 - 配置viper - [github.com/spf13/viper](https://github.com/spf13/viper)
+- json解析库json-iterator - [github.com/json-iterator/go](https://github.com/json-iterator/go)
 
 ## 参考
 https://tech.youzan.com/queuing_delay/  有赞的延迟队列
