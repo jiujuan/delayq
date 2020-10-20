@@ -1,5 +1,5 @@
 ## delayq
-延迟队列，基于redis的zset，list数据结构开发的。
+延迟队列，基于redis的zset，list数据结构开发的。（练习golang写的一个小应用）
 
 ## 项目依赖库
 - Redis内存数据库 - [github.com/redis/redis](https://github.com/redis/redis)
