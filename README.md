@@ -3,10 +3,10 @@
 
 ## 项目依赖库
 - Redis
-- redis的go库 - github.com/gomodule/redigo
-- web框架Gin - github.com/gin-gonic/gin
-- 日志zap - go.uber.org/zap
-- 配置viper - github.com/spf13/viper
+- redis的go库 - [github.com/gomodule/redigo](https://github.com/gomodule/redigo)
+- web框架Gin - [github.com/gin-gonic/gin](https://github.com/gin-gonic/gin)
+- 日志zap - [go.uber.org/zap](https://github.com/uber-go/zap)
+- 配置viper - [github.com/spf13/viper](https://github.com/spf13/viper)
 
 ## 参考
 https://tech.youzan.com/queuing_delay/  有赞的延迟队列
